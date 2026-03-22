@@ -12,6 +12,7 @@ public sealed class PadSettings
     public string? FilePath { get; set; }
     public float Volume { get; set; }
     public string Hotkey { get; set; } = nameof(Key.F1);
+    public string HotkeyModifiers { get; set; } = nameof(ModifierKeys.None);
 }
 
 public sealed class AppSettings

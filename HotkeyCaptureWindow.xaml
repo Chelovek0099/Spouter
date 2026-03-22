@@ -1,0 +1,14 @@
+<Window x:Class="Soundpad.HotkeyCaptureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Simple Soundpad" Height="150" Width="300"
+        WindowStyle="None" AllowsTransparency="True" Background="#2D2D2D"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        BorderThickness="1" BorderBrush="#555555">
+	<Grid>
+		<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+			<TextBlock Text="Нажмите сочетание клавиш..." Foreground="White" FontSize="16" Margin="0,0,0,10"/>
+			<TextBlock Text="(Esc для отмены)" Foreground="#888888" HorizontalAlignment="Center"/>
+		</StackPanel>
+	</Grid>
+</Window>

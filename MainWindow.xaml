@@ -20,7 +20,7 @@
                 <TextBlock Text="Simple Soundpad"
                            Foreground="White"
                            FontSize="18" />
-                <TextBlock Text="Хоткеи по умолчанию: F1–F8, можно переназначить (глобально: Ctrl+Alt+Key)"
+                <TextBlock Text="Хоткеи по умолчанию: F1–F8, можно переназначить"
                            Foreground="#CCCCCC"
                            FontSize="10" />
                 <TextBlock Text="Чтобы вывести в микрофон — выбери виртуальный кабель/микшер как Output, а его уже используй как микрофон в Discord/OBS."
@@ -58,7 +58,7 @@
                                        Margin="0,0,0,4" />
 
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                <TextBlock Text="{Binding Hotkey, StringFormat=Key: {0}}"
+                                <TextBlock Text="{Binding HotkeyDisplay, StringFormat=Key: {0}}"
                                            Foreground="#CCCCCC"
                                            FontSize="10"
                                            Margin="0,0,6,0"
@@ -67,7 +67,7 @@
                                         Width="70"
                                         Height="20"
                                         FontSize="10"
-                                        Click="SetHotkeyButton_Click" />
+                                        Click="OnSetKeyClick" />
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">

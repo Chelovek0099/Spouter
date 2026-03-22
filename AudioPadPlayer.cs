@@ -79,10 +79,15 @@ public sealed class AudioPadPlayer : IDisposable
     {
         lock (_lock)
         {
-            if (_reader is null || _output is null)
-                return;
+            if (_reader is null || _output is null) return;
 
-            _reader.Position = 0;
+            // Если уже что-то играет — принудительно стопаем
+            if (_output.PlaybackState == PlaybackState.Playing)
+            {
+                _output.Stop();
+            }
+
+            _reader.Position = 0; // Перематываем в начало
             _output.Play();
             IsPlaying = true;
         }

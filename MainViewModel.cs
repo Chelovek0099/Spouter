@@ -83,6 +83,11 @@ public sealed class MainViewModel : IDisposable
             {
                 pad.Hotkey = key;
             }
+
+            if (Enum.TryParse<ModifierKeys>(s.HotkeyModifiers, out var mods))
+            {
+                pad.HotkeyModifiers = mods;
+            }
         }
     }
 
@@ -99,7 +104,8 @@ public sealed class MainViewModel : IDisposable
             {
                 FilePath = pad.FilePath,
                 Volume = pad.Volume,
-                Hotkey = pad.Hotkey.ToString()
+                Hotkey = pad.Hotkey.ToString(),
+                HotkeyModifiers = pad.HotkeyModifiers.ToString()
             });
         }
 

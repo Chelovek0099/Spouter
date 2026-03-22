@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Controls;
 using Microsoft.Win32;
 
 namespace Soundpad;
@@ -76,33 +77,54 @@ public partial class MainWindow : Window
         }
     }
 
-    private void Window_KeyDown(object sender, KeyEventArgs e)
+    private bool IsModifierKey(Key key)
     {
-        // Режим захвата хоткея: переназначаем клавишу для выбранного пэда.
-        if (_hotkeyCaptureTarget is not null)
-        {
-            if (e.Key != Key.Escape && e.Key != Key.System)
-            {
-                _hotkeyCaptureTarget.Hotkey = e.Key;
-            }
-
-            _hotkeyCaptureTarget = null;
-            e.Handled = true;
-            return;
-        }
+        return key == Key.LeftCtrl || key == Key.RightCtrl ||
+               key == Key.LeftAlt || key == Key.RightAlt ||
+               key == Key.LeftShift || key == Key.RightShift ||
+               key == Key.LWin || key == Key.RWin;
     }
 
-    private void SetHotkeyButton_Click(object sender, RoutedEventArgs e)
+    private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (sender is not FrameworkElement element || element.DataContext is not PadViewModel pad)
-            return;
+        if (_hotkeyCaptureTarget is null) return;
 
-        _hotkeyCaptureTarget = pad;
-        MessageBox.Show(this,
-            "Нажмите новую клавишу для этого пэда (Esc — отмена).",
-            "Переназначение хоткея",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        Key key = (e.Key == Key.System) ? e.SystemKey : e.Key;
+        if (IsModifierKey(key)) return;
+
+        e.Handled = true;
+
+        if (key == Key.Escape)
+        {
+            _hotkeyCaptureTarget = null;
+            return;
+        }
+
+        _hotkeyCaptureTarget.Hotkey = key;
+        _hotkeyCaptureTarget.HotkeyModifiers = Keyboard.Modifiers;
+
+        _hotkeyCaptureTarget = null;
+    }
+
+    private void OnSetKeyClick(object sender, RoutedEventArgs e)
+    {
+        var button = sender as Button;
+        var pad = button?.DataContext as PadViewModel;
+        if (pad == null) return;
+
+        // Создаем окно захвата
+        var captureWindow = new HotkeyCaptureWindow();
+        captureWindow.Owner = this; // Чтобы окно было по центру основного
+
+        if (captureWindow.ShowDialog() == true && captureWindow.IsSuccess)
+        {
+            // Применяем новые данные
+            pad.Hotkey = captureWindow.ResultKey;
+            pad.HotkeyModifiers = captureWindow.ResultModifiers;
+
+            // Принудительно вызываем перерегистрацию всех хоткеев
+            RegisterGlobalHotkeys();
+        }
     }
 
     protected override void OnClosed(EventArgs e)
@@ -141,18 +163,17 @@ public partial class MainWindow : Window
 
     private void RegisterGlobalHotkeys()
     {
-        if (_hotkeyManager is null)
-            return;
+        if (_hotkeyManager is null) return;
 
         var bindings = _viewModel.Pads
-            .Select(pad => (pad.Hotkey, (Action)(() => TogglePadFromHotkey(pad))));
+            .Select(pad => (pad.HotkeyModifiers, pad.Hotkey, (Action)(() => TogglePadFromHotkey(pad))));
 
         _hotkeyManager.RegisterBindings(bindings);
     }
 
     private void TogglePadFromHotkey(PadViewModel pad)
     {
-        Dispatcher.Invoke(() =>
+        Dispatcher.BeginInvoke(new Action(() =>
         {
             try
             {
@@ -160,13 +181,9 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this,
-                    $"Ошибка при воспроизведении по глобальной горячей клавише:\n{ex.Message}",
-                    "Ошибка",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Ошибка хоткея: {ex.Message}");
             }
-        });
+        }));
     }
 
     private void PadOnPropertyChanged(object? sender, PropertyChangedEventArgs e)

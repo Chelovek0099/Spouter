@@ -13,6 +13,7 @@ public sealed class PadViewModel : INotifyPropertyChanged, IDisposable
     private string? _filePath;
     private float _volume = 1.0f;
     private Key _hotkey;
+    private ModifierKeys _hotkeyModifiers;
     private bool _isPlaying;
     private string? _deviceId;
 
@@ -49,8 +50,33 @@ public sealed class PadViewModel : INotifyPropertyChanged, IDisposable
     public Key Hotkey
     {
         get => _hotkey;
-        set => SetField(ref _hotkey, value);
+        set
+        {
+            if (SetField(ref _hotkey, value))
+            {
+                OnPropertyChanged(nameof(HotkeyDisplay));
+            }
+        }
     }
+
+    public ModifierKeys HotkeyModifiers
+    {
+        get => _hotkeyModifiers;
+        set
+        {
+            if (SetField(ref _hotkeyModifiers, value))
+            {
+                OnPropertyChanged(nameof(HotkeyDisplay));
+            }
+        }
+    }
+
+    private void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    public string HotkeyDisplay => HotkeyModifiers == ModifierKeys.None
+        ? Hotkey.ToString()
+        : $"{HotkeyModifiers} + {Hotkey}";
 
     public string? DeviceId
     {
